@@ -1,7 +1,11 @@
 const BillingCycle = require('./billingCycle')
 
+
+
 BillingCycle.methods(['get', 'post', 'put', 'delete'])
 BillingCycle.updateOptions({ new: true, runValidators: true }) //mew -> trazer os dados novos depois de atualiazar, runValidators -> recebe a validação também no pudate
+
+
 
 BillingCycle.route('count', (req, res, next) => {
     BillingCycle.count((error, value) => {
@@ -12,5 +16,24 @@ BillingCycle.route('count', (req, res, next) => {
         }
     })
 })
+
+
+BillingCycle.route('summary', (req, res, next) => {
+    BillingCycle.aggregate([{ 
+        $project: {credit: {$sum: "$credits.value"}, debt: {$sum: "$debts.value"}}  //extrair ciclo pagamento
+    }, { 
+        $group: {_id: null, credit: {$sum: "$credit"}, debt: {$sum: "$debt"}} //agrupar valores - credit
+    }, { 
+        $project: {_id: 0, credit: 1, debt: 1} //tirar id
+    }], (error, result) => {
+        if(error) {
+            res.status(500).json({errors: [error]}) //array errors
+        } else {
+            res.json(result[0] || {credit: 0, debt: 0})//resultado default
+        }
+    })
+})
+
+
 
 module.exports = BillingCycle
