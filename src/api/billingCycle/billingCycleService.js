@@ -1,11 +1,11 @@
 const BillingCycle = require('./billingCycle')
-
-
+const errorHandler = require('../common/errorHandler')
 
 BillingCycle.methods(['get', 'post', 'put', 'delete'])
 BillingCycle.updateOptions({ new: true, runValidators: true }) //mew -> trazer os dados novos depois de atualiazar, runValidators -> recebe a validação também no pudate
 
 
+BillingCycle.after('post', errorHandler).after('put', errorHandler)//aplicar middleware validação
 
 BillingCycle.route('count', (req, res, next) => {
     BillingCycle.count((error, value) => {
